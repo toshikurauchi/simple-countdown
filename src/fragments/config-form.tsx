@@ -60,6 +60,7 @@ const formSchema = z.object({
     )
     .transform((val) => val.join(":")),
   showLabels: z.boolean().default(false),
+  soundEnabled: z.boolean().default(false),
 });
 
 export type Config = z.infer<typeof formSchema>;
@@ -113,6 +114,24 @@ export function ConfigForm({ onConfigChanged, buttonText }: ConfigFormProps) {
               </FormControl>
               <FormLabel className="text-sm font-normal ml-2">
                 Show labels (Hours, Minutes, Seconds)
+              </FormLabel>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="soundEnabled"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel className="text-sm font-normal ml-2">
+                Sound enabled
               </FormLabel>
               <FormMessage />
             </FormItem>

@@ -50,6 +50,7 @@ export default function Home() {
             minutes={minutes}
             seconds={seconds}
             showLabels={config?.showLabels}
+            soundEnabled={config?.soundEnabled}
             onTogglePlaying={handleTogglePlaying}
             playing={playing}
           />

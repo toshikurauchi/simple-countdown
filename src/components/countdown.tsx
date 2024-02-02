@@ -6,6 +6,7 @@ type CountdownProps = {
   seconds: number;
   onTogglePlaying: () => void;
   playing: boolean;
+  soundEnabled?: boolean;
   showLabels?: boolean;
 };
 
@@ -39,24 +40,34 @@ export default function Countdown({
   seconds,
   showLabels,
   onTogglePlaying,
+  soundEnabled,
   playing,
 }: CountdownProps) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playedSound, setPlayedSound] = useState(false);
+
   const [remainingTime, setRemainingTime] = useState(
     computeTotalTimeInSeconds(hours, minutes, seconds)
   );
 
   useEffect(() => {
     setRemainingTime(computeTotalTimeInSeconds(hours, minutes, seconds));
+    setPlayedSound(false);
   }, [hours, minutes, seconds]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (playing) {
-        setRemainingTime((prev) => (prev > 0 ? prev - 1 : 0));
+        const currentTime = remainingTime > 0 ? remainingTime - 1 : 0;
+        setRemainingTime(currentTime);
+        if (soundEnabled && currentTime === 0 && !playedSound) {
+          audioRef.current?.play();
+          setPlayedSound(true);
+        }
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [playing]);
+  }, [playing, remainingTime, playedSound, soundEnabled]);
 
   function handleKeyDown(ev: KeyboardEvent<HTMLDivElement>) {
     if (ev.key === " ") {
@@ -92,6 +103,7 @@ export default function Countdown({
         }vw, 30rem)`,
       }}
     >
+      <audio src="/sounds/alarm-clock-short-6402.mp3" ref={audioRef} />
       <div className="flex">
         {remainingHours > 0 && (
           <div className="flex flex-col items-center">
