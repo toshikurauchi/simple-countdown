@@ -46,9 +46,11 @@ export default function Countdown({
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playedSound, setPlayedSound] = useState(false);
 
-  const [remainingTime, setRemainingTime] = useState(
+  const [startTime, setStartTime] = useState(Date.now());
+  const [totalTime, setTotalTime] = useState(
     computeTotalTimeInSeconds(hours, minutes, seconds)
   );
+  const [remainingTime, setRemainingTime] = useState(totalTime);
 
   useEffect(() => {
     setRemainingTime(computeTotalTimeInSeconds(hours, minutes, seconds));
@@ -56,17 +58,28 @@ export default function Countdown({
   }, [hours, minutes, seconds]);
 
   useEffect(() => {
+    if (playing) {
+      setStartTime(Date.now());
+      setTotalTime(remainingTime);
+    }
+  }, [playing]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       if (playing) {
-        const currentTime = remainingTime > 0 ? remainingTime - 1 : 0;
-        setRemainingTime(currentTime);
-        if (soundEnabled && currentTime === 0 && !playedSound) {
-          audioRef.current?.play();
-          setPlayedSound(true);
-        }
+        const ellapsedTime = Math.max(0, Date.now() - startTime);
+        const remainingTime = Math.max(0, totalTime - ellapsedTime / 1000);
+        setRemainingTime(remainingTime);
       }
-    }, 1000);
+    }, 20);
     return () => clearInterval(interval);
+  }, [playing, startTime, totalTime]);
+
+  useEffect(() => {
+    if (playing && remainingTime === 0 && !playedSound && soundEnabled) {
+      audioRef.current?.play();
+      setPlayedSound(true);
+    }
   }, [playing, remainingTime, playedSound, soundEnabled]);
 
   function handleKeyDown(ev: KeyboardEvent<HTMLDivElement>) {
